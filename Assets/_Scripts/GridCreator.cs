@@ -6,23 +6,18 @@ public class GridCreator : MonoBehaviour
 {
     [SerializeField] private GameObject unitCirclePrefab;
 
-    private CircleUnit[,] grid;
 
+    private CircleUnit[,] grid;
     [SerializeField] private int width;
     [SerializeField] private int height;
+    private bool gridIsCreated = false;
 
-    public Vector2 indexesDelta;
-    public Vector2 absDelta;
-    public Vector2 clampedDelta;
-    public Vector2 midUnitIndexes;
-
-    void Start()
+    public void GenerateGrid()
     {
-        GenerateGrid();
-    }
+        if (gridIsCreated) return;
 
-    private void GenerateGrid()
-    {
+        gridIsCreated = true;
+
         grid = new CircleUnit[width, height];
         for (int i = 0; i < width; i++)
         {
@@ -34,6 +29,7 @@ public class GridCreator : MonoBehaviour
                 currentCell.name = "cell[" + i.ToString() + ", " + j.ToString() + "]";
                 grid[i, j] = currentCell.GetComponent<CircleUnit>();
                 grid[i, j].unitIndexes = new Vector2(i, j);
+                grid[i, j].SetUnitPosition();
             }
         }
 
@@ -45,35 +41,56 @@ public class GridCreator : MonoBehaviour
 
     public CircleUnit GetCircleBetween(CircleUnit first, CircleUnit second)
     {
-       indexesDelta = second.unitIndexes - first.unitIndexes;
-       absDelta = new Vector2(Mathf.Abs(indexesDelta.x), Mathf.Abs(indexesDelta.y));
-        if (absDelta.x != absDelta.y) 
+        Vector2 indexesDelta = second.unitIndexes - first.unitIndexes;
+        Vector2 absDelta = new Vector2(Mathf.Abs(indexesDelta.x), Mathf.Abs(indexesDelta.y));
+        if (absDelta.x != absDelta.y)
         {
             if (absDelta.x > 0f && absDelta.y > 0f)
             {
-                Debug.Log("return null mid circle");
                 return null;
             }
         }
-        /*
-        if (absDelta.x == absDelta.y ||
-            absDelta.x == 0f && absDelta.y > 0f ||
-            absDelta.x > 0f && absDelta.y == 0f)
-        {
-
-        }
-        */
-        clampedDelta = new Vector2(Mathf.Clamp(indexesDelta.x, -1f, 1f), Mathf.Clamp(indexesDelta.y, -1f, 1f));
-        midUnitIndexes = first.unitIndexes + clampedDelta;
+        Vector2 clampedDelta = new Vector2(Mathf.Clamp(indexesDelta.x, -1f, 1f), Mathf.Clamp(indexesDelta.y, -1f, 1f));
+        Vector2 midUnitIndexes = first.unitIndexes + clampedDelta;
         CircleUnit midUnit = grid[Mathf.RoundToInt(midUnitIndexes.x), Mathf.RoundToInt(midUnitIndexes.y)];
-        if (midUnit != null && midUnit.isOccupied == false)
+
+        if (midUnit == null) return null;
+        if (midUnit.isOccupied == true) return null;
+        if (midUnit == second) return null;
+        
+        return midUnit;
+    }
+
+    public CircleUnit GetRandomFreeUnit()
+    {
+        List<CircleUnit> freeCircles = GetFreeCircles();
+        if (freeCircles.Count == 0)
         {
-            return midUnit;
+            return null;
         }
         else
         {
-            Debug.Log("can not find mid circle or it is occupied");
+            CircleUnit randomUnit = freeCircles.ToArray()[Random.Range(0, freeCircles.Count)];
+            return randomUnit;
         }
-        return null;
+
+    }
+
+    private List<CircleUnit> GetFreeCircles()
+    {
+        List<CircleUnit> freeCircles = new List<CircleUnit>();
+        foreach (var circle in grid)
+        {
+            if (circle.isOccupied == false)
+            {
+                freeCircles.Add(circle);
+            }
+        }
+        return freeCircles;
+    }
+
+    public int GetCirclesCount()
+    {
+        return height * width;
     }
 }

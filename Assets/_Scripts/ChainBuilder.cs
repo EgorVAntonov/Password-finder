@@ -5,17 +5,17 @@ using UnityEngine.Events;
 
 public class ChainBuilder : MonoBehaviour
 {
-    [SerializeField] private Transform testObject;
+    [SerializeField] private Camera _camera;
+    [SerializeField] private Transform dot;
     [SerializeField] private GridCreator grid;
+    [SerializeField] private LevelValidator validator;
     [Space]
     [SerializeField] private LineRenderer line;
-    [SerializeField] private Camera _camera;
     [Space]
     [SerializeField] private List<CircleUnit> circlesChain;
 
     private Vector3 currentInputPosition;
-    private CircleUnit nextCircle;
-
+    private CircleUnit touchedCircle;
     private bool isBuilding;
 
     void Start()
@@ -49,11 +49,11 @@ public class ChainBuilder : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
             {
-                currentInputPosition = hit.point;
+                currentInputPosition = new Vector3(hit.point.x, hit.point.y, 0f);
                 SetLastPointOfLineToCurrentTouchPos();
             }
 
-            testObject.position = CutVectorOnZ(currentInputPosition);
+            dot.position = currentInputPosition;
         }
     }
 
@@ -61,44 +61,59 @@ public class ChainBuilder : MonoBehaviour
     {
         if (line.positionCount > 1)
         {
-            line.SetPosition(line.positionCount - 1, CutVectorOnZ(currentInputPosition));
+            line.SetPosition(line.positionCount - 1, currentInputPosition);
         }
     }
 
     public void HandleUnitTouch(CircleUnit unit)
     {
-        nextCircle = unit;
+        touchedCircle = unit;
 
         if (line.positionCount == 0)
         {
-            circlesChain.Add(nextCircle);
-            StartBuild(unit);
+            circlesChain.Add(touchedCircle);
+            StartDraw(unit);
             return;
         }
-        CircleUnit midUnit = grid.GetCircleBetween(circlesChain.ToArray()[circlesChain.Count - 1], nextCircle);
+        CheckMiddleCircles();
+        circlesChain.Add(touchedCircle);
+        AppendLine(touchedCircle.unitPosition);
+        DefineNewSegment();
+    }
+
+    private void CheckMiddleCircles()
+    {
+        CircleUnit midUnit = grid.GetCircleBetween(circlesChain.ToArray()[circlesChain.Count - 1], touchedCircle);
         while (midUnit != null)
         {
             circlesChain.Add(midUnit);
+            AppendLine(midUnit.unitPosition);
             midUnit.isOccupied = true;
-            AppendLine(midUnit.transform.position);
-            midUnit = grid.GetCircleBetween(circlesChain.ToArray()[circlesChain.Count - 1], nextCircle);
+            DefineNewSegment();
+
+            midUnit = grid.GetCircleBetween(circlesChain.ToArray()[circlesChain.Count - 1], touchedCircle);
         }
-        circlesChain.Add(nextCircle);
-        AppendLine(nextCircle.transform.position);
+    }
+
+    private void DefineNewSegment()
+    {
+        CircleUnit[] circlesChainArray = circlesChain.ToArray();
+        Vector2 segmentOffset = circlesChainArray[circlesChainArray.Length-1].unitIndexes - circlesChainArray[circlesChainArray.Length - 2].unitIndexes;
+        validator.AddToCurrentKit(segmentOffset);
     }
 
     private void AppendLine(Vector3 nextPosition)
     {
         line.positionCount++;
-        line.SetPosition(line.positionCount - 2, CutVectorOnZ(nextPosition));
+        line.SetPosition(line.positionCount - 2, nextPosition);
     }
 
-    private void StartBuild(CircleUnit unit)
+    private void StartDraw(CircleUnit unit)
     {
         circlesChain.Add(unit);
         isBuilding = true;
         line.positionCount = 2;
-        line.SetPosition(0, CutVectorOnZ(unit.transform.position));
+        line.SetPosition(0, unit.unitPosition);
     }
 
     public void EraseLine()
@@ -112,10 +127,11 @@ public class ChainBuilder : MonoBehaviour
             circle.isOccupied = false;
         }
         circlesChain.Clear();
+        validator.ClearCurrentKit();
     }
 
-    private Vector3 CutVectorOnZ(Vector3 vector)
+    public void ShowHint()
     {
-        return new Vector3(vector.x, vector.y, 0f);
+        
     }
 }
