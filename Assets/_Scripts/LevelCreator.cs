@@ -54,7 +54,7 @@ public class LevelCreator : MonoBehaviour
     private void AppendCircleChain(CircleUnit nextUnit)
     {
         circlesChain.Add(nextUnit);
-        nextUnit.isOccupied = true;
+        nextUnit.isInChain = true;
         answerLine.AppendTestLine(nextUnit.unitPosition);
     }
 
@@ -62,7 +62,7 @@ public class LevelCreator : MonoBehaviour
     {
         foreach (var circle in circlesChain)
         {
-            circle.isOccupied = false;
+            circle.isInChain = false;
         }
     }
 

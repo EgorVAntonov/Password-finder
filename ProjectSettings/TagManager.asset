@@ -41,3 +41,12 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Circles
+    uniqueID: 851441929
+    locked: 0
+  - name: Hints
+    uniqueID: 3295801231
+    locked: 0
+  - name: Line
+    uniqueID: 25176059
+    locked: 0

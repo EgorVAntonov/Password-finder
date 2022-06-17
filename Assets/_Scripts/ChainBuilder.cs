@@ -11,6 +11,7 @@ public class ChainBuilder : MonoBehaviour
     [SerializeField] private LevelValidator validator;
     [Space]
     [SerializeField] private LineRenderer line;
+    //[SerializeField] private LineRenderer[] lines;
     [Space]
     [SerializeField] private List<CircleUnit> circlesChain;
 
@@ -75,20 +76,20 @@ public class ChainBuilder : MonoBehaviour
             StartDraw(unit);
             return;
         }
-        CheckMiddleCircles();
+        CheckCircleSkipping();
         circlesChain.Add(touchedCircle);
         AppendLine(touchedCircle.unitPosition);
         DefineNewSegment();
     }
 
-    private void CheckMiddleCircles()
+    private void CheckCircleSkipping()
     {
         CircleUnit midUnit = grid.GetCircleBetween(circlesChain.ToArray()[circlesChain.Count - 1], touchedCircle);
         while (midUnit != null)
         {
             circlesChain.Add(midUnit);
             AppendLine(midUnit.unitPosition);
-            midUnit.isOccupied = true;
+            midUnit.isInChain = true;
             DefineNewSegment();
 
             midUnit = grid.GetCircleBetween(circlesChain.ToArray()[circlesChain.Count - 1], touchedCircle);
@@ -124,14 +125,9 @@ public class ChainBuilder : MonoBehaviour
         line.positionCount = 0;
         foreach (var circle in circlesChain)
         {
-            circle.isOccupied = false;
+            circle.isInChain = false;
         }
         circlesChain.Clear();
         validator.ClearCurrentKit();
-    }
-
-    public void ShowHint()
-    {
-        
     }
 }

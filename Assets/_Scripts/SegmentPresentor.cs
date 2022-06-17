@@ -21,14 +21,8 @@ public class SegmentPresentor : MonoBehaviour
         int count = segment.count;
         for (int i = 0; i < indicators.Length; i++)
         {
-            if (i<count)
-            {
-                indicators[i].gameObject.SetActive(true);
-            }
-            else
-            {
-                indicators[i].gameObject.SetActive(false);
-            }
+            indicators[i].color = Color.white;
+            indicators[i].gameObject.SetActive(i < count);
         }
     }
 

@@ -6,7 +6,6 @@ public class GridCreator : MonoBehaviour
 {
     [SerializeField] private GameObject unitCirclePrefab;
 
-
     private CircleUnit[,] grid;
     [SerializeField] private int width;
     [SerializeField] private int height;
@@ -14,7 +13,11 @@ public class GridCreator : MonoBehaviour
 
     public void GenerateGrid()
     {
-        if (gridIsCreated) return;
+        if (gridIsCreated)
+        {
+            SetupCircles();
+            return;
+        }
 
         gridIsCreated = true;
 
@@ -39,6 +42,18 @@ public class GridCreator : MonoBehaviour
         }
     }
 
+    private void SetupCircles()
+    {
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                grid[i, j].prevCircle = null;
+                grid[i, j].nextCircle = null;
+            }
+        }
+    }
+
     public CircleUnit GetCircleBetween(CircleUnit first, CircleUnit second)
     {
         Vector2 indexesDelta = second.unitIndexes - first.unitIndexes;
@@ -55,7 +70,7 @@ public class GridCreator : MonoBehaviour
         CircleUnit midUnit = grid[Mathf.RoundToInt(midUnitIndexes.x), Mathf.RoundToInt(midUnitIndexes.y)];
 
         if (midUnit == null) return null;
-        if (midUnit.isOccupied == true) return null;
+        if (midUnit.isInChain == true) return null;
         if (midUnit == second) return null;
         
         return midUnit;
@@ -81,7 +96,7 @@ public class GridCreator : MonoBehaviour
         List<CircleUnit> freeCircles = new List<CircleUnit>();
         foreach (var circle in grid)
         {
-            if (circle.isOccupied == false)
+            if (circle.isInChain == false)
             {
                 freeCircles.Add(circle);
             }
