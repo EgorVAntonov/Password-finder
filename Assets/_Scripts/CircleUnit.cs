@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 
 public class CircleUnit : MonoBehaviour, IPointerEnterHandler, IPointerClickHandler
 {
-    private static CircleUnit activeCircle = null;
+    public static CircleUnit lastTouchedCircle = null;
     [SerializeField] private ChainBuilder chain;
     [SerializeField] private DoubleClickChecker doubleClick;
 
@@ -19,37 +19,39 @@ public class CircleUnit : MonoBehaviour, IPointerEnterHandler, IPointerClickHand
     public bool isInChain;
     public bool arrowRevealed;
 
-    public LineRenderer line;
-    public CircleUnit prevCircle;
-    public CircleUnit nextCircle;
-
-    void Start()
+    private void Start()
     {
-        chain = FindObjectOfType<ChainBuilder>();
-        prevCircle = null;
-        nextCircle = null;
+        Setup();
+    }
+
+    private void Setup()
+    {
         isInChain = false;
+        chain = FindObjectOfType<ChainBuilder>();
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (isInChain) return;
         if (eventData.pointerId != 0) return;
+        if (lastTouchedCircle == this) return;
 
-        isInChain = true;
-        if (chain != null)
-        {
-            chain.HandleUnitTouch(this);
-        }
+        chain.HandleUnitTouch(this);
+    }
+
+    public void SetLastTouchedCircle()
+    {
+        Debug.Log(gameObject.name + " become an active circle");
+        lastTouchedCircle = this;
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        if (eventData.pointerId != 0) return;
+
         if (doubleClick.Check())
         {
             Debug.Log("double click");
-            //if double
-            //delete segments
+            chain.ClearConnections(this);
         }
     }
 

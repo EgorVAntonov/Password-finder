@@ -33,8 +33,6 @@ public class SegmentPresentorsController : MonoBehaviour
     {
         presentorsCount = segments.Count;
 
-        //TurnOffAllPresentors();
-
         Segment[] segmentsArray = segments.ToArray();
         for (int i = 0; i < presentorsPool.Length; i++)
         {
@@ -50,14 +48,6 @@ public class SegmentPresentorsController : MonoBehaviour
         }
 
         ShufflePresentors();
-    }
-
-    private void TurnOffAllPresentors()
-    {
-        for (int i = 0; i < presentorsPool.Length; i++)
-        {
-            presentorsPool[i].gameObject.SetActive(false);
-        }
     }
 
     private void ShufflePresentors()

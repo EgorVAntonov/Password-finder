@@ -15,6 +15,11 @@ public class HintsController : MonoBehaviour
     public void SetCircleChain(CircleUnit[] chain)
     {
         targetCircleChain = chain;
+        if (targetCircleChain.Length == 0)
+        {
+            Debug.LogError("Circle chain for hints is 0 length");
+            return;
+        }
         SetupHints();
     }
 

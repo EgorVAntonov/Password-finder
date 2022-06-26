@@ -9,8 +9,14 @@ public class LevelCreator : MonoBehaviour
     [SerializeField] private AnswerLine answerLine;
     [SerializeField] private LevelValidator validator;
     [SerializeField] private HintsController hints;
+    [SerializeField] private ChainBuilder builder;
 
     private List<CircleUnit> circlesChain;
+
+    private void Start()
+    {
+        //CreateLevel();
+    }
 
     public void CreateLevel()
     {
@@ -18,16 +24,27 @@ public class LevelCreator : MonoBehaviour
         grid.GenerateGrid();
         GenerateCircleChain();
         hints.SetCircleChain(circlesChain.ToArray());
-        SetEveryCircleFree();
         DefineSegmentKit();
         validator.SetupPresentors();
     }
 
     private void PrepareCreating()
     {
+        SetEveryCircleFree();
         circlesChain = new List<CircleUnit>();
         validator.ClearTargetKit();
         answerLine.ClearLine();
+        builder.ClearAllConnections();
+    }
+
+    private void SetEveryCircleFree()
+    {
+        if (circlesChain == null) return;
+
+        foreach (var circle in circlesChain)
+        {
+            circle.isInChain = false;
+        }
     }
 
     private void GenerateCircleChain()
@@ -55,15 +72,7 @@ public class LevelCreator : MonoBehaviour
     {
         circlesChain.Add(nextUnit);
         nextUnit.isInChain = true;
-        answerLine.AppendTestLine(nextUnit.unitPosition);
-    }
-
-    private void SetEveryCircleFree()
-    {
-        foreach (var circle in circlesChain)
-        {
-            circle.isInChain = false;
-        }
+        answerLine.AppendLine(nextUnit.unitPosition);
     }
 
     private void DefineSegmentKit()

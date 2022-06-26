@@ -11,12 +11,17 @@ public class LevelValidator : MonoBehaviour
 
     private List<Segment> targetKit;
     private List<Segment> currentKit;
-    private bool levelCompleted;
+    private bool segmentsMatch;
     private bool canMoveToNextlevel;
 
     private void Start()
     {
-        levelCompleted = false;
+        Setup();
+    }
+
+    private void Setup()
+    {
+        segmentsMatch = false;
         canMoveToNextlevel = false;
         targetKit = new List<Segment>();
         currentKit = new List<Segment>();
@@ -31,8 +36,14 @@ public class LevelValidator : MonoBehaviour
         }
     }
 
+    public void SetupPresentors()
+    {
+        presentors.CreatePresentors(targetKit);
+    }
+
     public void ClearTargetKit()
     {
+        if (targetKit == null) return;
         targetKit.Clear();
     }
 
@@ -41,9 +52,11 @@ public class LevelValidator : MonoBehaviour
         AddToKit(targetKit, offset);
     }
 
-    public void SetupPresentors()
+    public void ClearCurrentKit()
     {
-        presentors.CreatePresentors(targetKit);
+        if (currentKit == null) return;
+        currentKit.Clear();
+        FindMatches();
     }
 
     public void AddToCurrentKit(Vector2 offset)
@@ -89,7 +102,9 @@ public class LevelValidator : MonoBehaviour
 
     private void FindMatches()
     {
-        levelCompleted = true;
+        if (targetKit.Count == 0) return;
+
+        segmentsMatch = true;
         foreach (var targetSegment in targetKit)
         {
             SegmentType type = targetSegment.data.type;
@@ -98,26 +113,23 @@ public class LevelValidator : MonoBehaviour
             if (currentSegment == null)
             {
                 presentors.ShowCountMatch(type, targetSegment.count, 0);
-                levelCompleted = false;
+                segmentsMatch = false;
             }
             else
             {
                 presentors.ShowCountMatch(type, targetSegment.count, currentSegment.count);
                 if (targetSegment.count != currentSegment.count)
                 {
-                    levelCompleted = false;
+                    segmentsMatch = false;
                 }
             }
         }
-        if (levelCompleted)
-        {
-            canMoveToNextlevel = true;
-        }
-    }
+        if (segmentsMatch == false) return;
 
-    public void ClearCurrentKit()
-    {
-        currentKit.Clear();
-        FindMatches();
+        if (true)
+        {
+
+        }
+        canMoveToNextlevel = true;
     }
 }

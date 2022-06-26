@@ -13,13 +13,7 @@ public class GridCreator : MonoBehaviour
 
     public void GenerateGrid()
     {
-        if (gridIsCreated)
-        {
-            SetupCircles();
-            return;
-        }
-
-        gridIsCreated = true;
+        if (gridIsCreated) return;
 
         grid = new CircleUnit[width, height];
         for (int i = 0; i < width; i++)
@@ -35,6 +29,7 @@ public class GridCreator : MonoBehaviour
                 grid[i, j].SetUnitPosition();
             }
         }
+        gridIsCreated = true;
 
         Vector3 GetPositionForCell(int x, int y)
         {
@@ -42,21 +37,9 @@ public class GridCreator : MonoBehaviour
         }
     }
 
-    private void SetupCircles()
+    public CircleUnit GetCircleBetween(CircleUnit from, CircleUnit to)
     {
-        for (int i = 0; i < width; i++)
-        {
-            for (int j = 0; j < height; j++)
-            {
-                grid[i, j].prevCircle = null;
-                grid[i, j].nextCircle = null;
-            }
-        }
-    }
-
-    public CircleUnit GetCircleBetween(CircleUnit first, CircleUnit second)
-    {
-        Vector2 indexesDelta = second.unitIndexes - first.unitIndexes;
+        Vector2 indexesDelta = to.unitIndexes - from.unitIndexes;
         Vector2 absDelta = new Vector2(Mathf.Abs(indexesDelta.x), Mathf.Abs(indexesDelta.y));
         if (absDelta.x != absDelta.y)
         {
@@ -66,12 +49,12 @@ public class GridCreator : MonoBehaviour
             }
         }
         Vector2 clampedDelta = new Vector2(Mathf.Clamp(indexesDelta.x, -1f, 1f), Mathf.Clamp(indexesDelta.y, -1f, 1f));
-        Vector2 midUnitIndexes = first.unitIndexes + clampedDelta;
+        Vector2 midUnitIndexes = from.unitIndexes + clampedDelta;
         CircleUnit midUnit = grid[Mathf.RoundToInt(midUnitIndexes.x), Mathf.RoundToInt(midUnitIndexes.y)];
 
         if (midUnit == null) return null;
         if (midUnit.isInChain == true) return null;
-        if (midUnit == second) return null;
+        if (midUnit == to) return null;
         
         return midUnit;
     }
@@ -102,10 +85,5 @@ public class GridCreator : MonoBehaviour
             }
         }
         return freeCircles;
-    }
-
-    public int GetCirclesCount()
-    {
-        return height * width;
     }
 }

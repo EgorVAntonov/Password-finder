@@ -8,7 +8,7 @@ public class AnswerLine : MonoBehaviour
     [SerializeField] private LineRenderer line;
     private bool isVisible;
 
-    public void AppendTestLine(Vector3 position)
+    public void AppendLine(Vector3 position)
     {
         line.positionCount++;
         line.SetPosition(line.positionCount - 1, position);
